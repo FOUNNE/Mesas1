@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>¿En qué mesa estoy? — Taller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#08152B;
+    --blue-inst:#0E1F3D;
+    --blue-mid:#16305C;
+    --blue-line:#254878;
+    --gold:#C9A227;
+    --gold-light:#F2CC55;
+    --paper:#F5F2EA;
+    --text-2:#7E8CA8;
+    --bar-base:#3D6BA8;
+    --bar-top:#5D8FD6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background: radial-gradient(120% 80% at 50% -10%, var(--blue-mid), var(--bg-deep) 62%);
+    font-family:'Archivo', sans-serif;
+    color: var(--paper);
+    display:flex;
+    justify-content:center;
+    padding: clamp(20px, 6vh, 44px) 16px clamp(40px, 8vh, 64px);
+  }
+  .wrap{
+    width:100%;
+    max-width: 440px;
+  }
+  .eventmark{
+    text-align:center;
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    font-size: clamp(11px, 2.6vw, 13px);
+    margin-bottom: clamp(14px, 3vh, 20px);
+  }
+  h1{
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 7vw, 34px);
+    line-height: 1.12;
+    color: var(--paper);
+    text-align:center;
+    margin: 0 0 8px;
+    text-shadow: 0 0 40px rgba(93,143,214,0.35);
+  }
+  .sub{
+    text-align:center;
+    color: var(--text-2);
+    font-size: clamp(13.5px, 3.4vw, 15px);
+    line-height:1.5;
+    margin: 0 0 clamp(20px, 4vh, 30px);
+  }
+  .question{
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 600;
+    font-size: clamp(18px, 4.6vw, 21px);
+    line-height: 1.2;
+    color: var(--paper);
+    text-align:center;
+    margin: clamp(4px, 1.2vh, 8px) 0 10px;
+  }
+
+  .card{
+    background: var(--blue-inst);
+    border: 1px solid var(--blue-line);
+    border-radius: 16px;
+    padding: clamp(18px, 4vw, 24px) clamp(18px, 4vw, 22px) clamp(20px, 4vw, 26px);
+    box-shadow: 0 24px 48px -20px rgba(0,0,0,0.6);
+  }
+
+  label{
+    display:block;
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: clamp(11px, 2.6vw, 12.5px);
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .input-row{
+    position:relative;
+  }
+  input[type="text"]{
+    width:100%;
+    font-family:'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: clamp(16px, 4vw, 18px);
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--blue-line);
+    background: var(--bg-deep);
+    color: var(--paper);
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input[type="text"]:focus{
+    border-color: var(--bar-top);
+    box-shadow: 0 0 0 4px rgba(93,143,214,0.22);
+  }
+  input[type="text"]::placeholder{
+    color: var(--text-2);
+    font-weight: 400;
+  }
+  .hint{
+    font-size: clamp(12px, 2.8vw, 13px);
+    color: var(--text-2);
+    margin-top: 9px;
+  }
+
+  .results{
+    margin-top: 18px;
+  }
+
+  /* Match list (disambiguation) */
+  .matchlist{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .match-item{
+    text-align:left;
+    width:100%;
+    background: var(--blue-mid);
+    border:1.5px solid var(--blue-line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family:'Archivo', sans-serif;
+    cursor:pointer;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .match-item:active{ transform: scale(0.98); }
+  .match-item:hover{ border-color: var(--bar-top); }
+  .match-name{
+    font-weight:600;
+    font-size: clamp(14.5px, 3.6vw, 15.5px);
+    color: var(--paper);
+  }
+  .match-claustro{
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: clamp(11px, 2.6vw, 12px);
+    color: var(--text-2);
+    margin-top: 3px;
+  }
+
+  /* Ticket reveal — blue dims out, gold is the only thing lit */
+  .ticket{
+    margin-top: 4px;
+    background: var(--blue-mid);
+    border-radius: 14px;
+    border: 1.5px solid var(--blue-line);
+    overflow:hidden;
+    animation: rise .35s ease both;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .ticket-top{
+    padding: 16px 18px 14px;
+    opacity: 0.26;
+  }
+  .ticket-name{
+    font-weight:600;
+    font-size: clamp(15px, 3.8vw, 16.5px);
+    color: var(--paper);
+  }
+  .ticket-claustro{
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(11px, 2.6vw, 12.5px);
+    color: var(--paper);
+    margin-top: 3px;
+  }
+  .perforation{
+    position:relative;
+    height: 0;
+    border-top: 2px dashed var(--blue-line);
+    margin: 0 0;
+  }
+  .perforation::before,.perforation::after{
+    content:'';
+    position:absolute;
+    top:-9px;
+    width:18px; height:18px;
+    background: var(--bg-deep);
+    border-radius:50%;
+  }
+  .perforation::before{ left:-9px; }
+  .perforation::after{ right:-9px; }
+  .ticket-bottom{
+    padding: 20px 18px 24px;
+    text-align:center;
+    background: rgba(201,162,39,0.08);
+  }
+  .mesa-label{
+    font-family:'Archivo Narrow', sans-serif;
+    font-size: clamp(11px, 2.6vw, 12.5px);
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .mesa-number{
+    font-family:'Archivo', sans-serif;
+    font-weight:800;
+    font-size: clamp(56px, 18vw, 84px);
+    line-height:1;
+    color: var(--gold-light);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 50px rgba(242,204,85,0.35);
+  }
+  .mesa-caption{
+    font-size: clamp(12.5px, 3vw, 13.5px);
+    color: var(--text-2);
+    margin-top: 8px;
+  }
+  .change-search{
+    display:block;
+    width:100%;
+    text-align:center;
+    background:none;
+    border:none;
+    color: var(--bar-top);
+    font-family:'Archivo Narrow', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(12px, 2.8vw, 13px);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 16px 0 0;
+    cursor:pointer;
+  }
+
+  /* Not found state */
+  .notfound{
+    background: rgba(201,162,39,0.07);
+    border: 1.5px solid var(--blue-line);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: clamp(13px, 3.2vw, 14px);
+    line-height:1.5;
+    color: var(--paper);
+  }
+  .notfound strong{ color: var(--gold-light); }
+
+  footer{
+    text-align:center;
+    color: var(--text-2);
+    font-size: clamp(11px, 2.6vw, 12px);
+    margin-top: clamp(18px, 4vh, 26px);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eventmark">Primer Taller Participativo PEDI-FOUNNE</div>
+  <h1>¡Bienvenidos!</h1>
+  <p class="question">¿En qué mesa estoy?</p>
+  <p class="sub">Escribí tu apellido y nombre para ver tu mesa asignada.</p>
+
+  <div class="card">
+    <label for="q">Apellido y nombre</label>
+    <div class="input-row">
+      <input type="text" id="q" placeholder="Ej: Gómez Ana" autocomplete="off" autocapitalize="words" />
+    </div>
+    <p class="hint" id="hint">Podés escribir solo el apellido.</p>
+
+    <div class="results" id="results"></div>
+  </div>
+
+  <footer>Si no aparecés en la lista, avisá a los organizadores en la mesa de acreditación.</footer>
+</div>
+
+<script>
+const DATA = [{"n": "Melisa Raquel Lezcano", "c": "Investigador/a", "m": 1}, {"n": "MARIA ESTER RESOAGLI", "c": "Docente", "m": 1}, {"n": "Edgardo Daniel Acevedo", "c": "Investigador/a", "m": 1}, {"n": "Maria carla Velar", "c": "Personal no docente", "m": 1}, {"n": "Nicolas Llarens", "c": "Estudiante de grado", "m": 1}, {"n": "Alejandro Horacio Aquino", "c": "Docente", "m": 1}, {"n": "Alejandro Joaquin Encina Tutuy", "c": "Docente", "m": 1}, {"n": "Natalia  Montiel", "c": "Docente", "m": 1}, {"n": "Alana Rodríguez Villa", "c": "Estudiante de grado", "m": 1}, {"n": "Victoria Fernanda Lopez", "c": "Docente", "m": 1}, {"n": "Andrés Benetti", "c": "Docente", "m": 1}, {"n": "Maria Laura Rosende", "c": "Personal no docente", "m": 1}, {"n": "Cesar Enrique Gutierrez", "c": "Docente", "m": 2}, {"n": "Brisa Lopez", "c": "Estudiante de grado", "m": 2}, {"n": "Mendoza Valentina", "c": "Estudiante de grado", "m": 2}, {"n": "Soto Taragano Sol Milagros", "c": "Estudiante de grado", "m": 2}, {"n": "Rita Ignacia Mambrín", "c": "Personal no docente", "m": 2}, {"n": "Diana Emilia Falcón", "c": "Docente", "m": 2}, {"n": "Antonella Jazmin Godoy Gutiérrez", "c": "Graduado/a", "m": 2}, {"n": "Félix María Ramón Delgado", "c": "Personal no docente", "m": 2}, {"n": "Cinthia Meza Gutierrez", "c": "Docente", "m": 3}, {"n": "Julia Aldana Sanagua", "c": "Estudiante de grado", "m": 3}, {"n": "Maria Eugenia San Lorenzo Diaz", "c": "Estudiante de grado", "m": 3}, {"n": "Lezcano Lucía Jazmín", "c": "Estudiante de grado", "m": 3}, {"n": "Solís, Marcela Alejandra", "c": "Personal no docente", "m": 3}, {"n": "María Alejandra Gili", "c": "Investigador/a", "m": 3}, {"n": "Norma Diaz", "c": "Docente", "m": 3}, {"n": "Candela Tome Harvey", "c": "Graduado/a", "m": 3}, {"n": "Natalia Rosende", "c": "Docente", "m": 4}, {"n": "Luisina Mandato", "c": "Estudiante de grado", "m": 4}, {"n": "Mansilla Malena Sol", "c": "Estudiante de grado", "m": 4}, {"n": "Maria Floriana Beria", "c": "Estudiante de grado", "m": 4}, {"n": "Marlene Carolina Bessone", "c": "Personal no docente", "m": 4}, {"n": "Gonzalo Florencio", "c": "Estudiante de grado", "m": 4}, {"n": "Viviana Elizabeth Karaben", "c": "Investigador/a", "m": 4}, {"n": "María Lidia Elizondo", "c": "Docente", "m": 4}, {"n": "Susana Gastaldo", "c": "Docente", "m": 5}, {"n": "Paola Daveta", "c": "Estudiante de grado", "m": 5}, {"n": "Gonzalez Daiana Alejandra", "c": "Estudiante de grado", "m": 5}, {"n": "Cheme González Sofía", "c": "Estudiante de grado", "m": 5}, {"n": "Jorge daniel luque", "c": "Personal no docente", "m": 5}, {"n": "Aymara Ileana Goyeneche", "c": "Personal no docente", "m": 5}, {"n": "Antononella Vandecaveye", "c": "Estudiante de grado", "m": 5}, {"n": "Nilda Maria del Rosario Alvarez", "c": "Investigador/a", "m": 5}, {"n": "Graciela  monica gualdoni", "c": "Docente", "m": 6}, {"n": "Ricardo Herrera", "c": "Estudiante de grado", "m": 6}, {"n": "Monzon Milagros Soledad", "c": "Estudiante de grado", "m": 6}, {"n": "Ortellado Natalia q", "c": "Estudiante de grado", "m": 6}, {"n": "Sandra Monica Ferreyra", "c": "Personal no docente", "m": 6}, {"n": "Veronica Juana Pucheta Tajan", "c": "Graduado/a", "m": 6}, {"n": "Carlos Enrique Segovia Alvarez", "c": "Personal no docente", "m": 6}, {"n": "Kuhne Maria Florencia", "c": "Estudiante de grado", "m": 6}, {"n": "Maria Claudia Gallego", "c": "Docente", "m": 7}, {"n": "Camila Soraya Rios", "c": "Estudiante de grado", "m": 7}, {"n": "Sabrina Ailen Michnik", "c": "Estudiante de grado", "m": 7}, {"n": "Perez Verónica Viviana", "c": "Estudiante de grado", "m": 7}, {"n": "Elizabeth Ramirez", "c": "Personal no docente", "m": 7}, {"n": "Claudia Norma H Zini Carbone", "c": "Docente", "m": 7}, {"n": "Agustina Michelon", "c": "Graduado/a", "m": 7}, {"n": "Mendiaz Joaquin Aitor", "c": "Personal no docente", "m": 7}, {"n": "LAURA HUBER", "c": "Docente", "m": 8}, {"n": "Roxana Vera", "c": "Estudiante de grado", "m": 8}, {"n": "Martin Kohler", "c": "Estudiante de grado", "m": 8}, {"n": "Oriana Godoy Fernandez", "c": "Estudiante de grado", "m": 8}, {"n": "Leandro Rafael Adis Alí", "c": "Personal no docente", "m": 8}, {"n": "Mariel Beatriz Galiana", "c": "Investigador/a", "m": 8}, {"n": "Maria Lorena Cardoso", "c": "Docente", "m": 8}, {"n": "Maria de las Mercedes Medina", "c": "Docente", "m": 8}, {"n": "Miguel Angel Vera", "c": "Docente", "m": 9}, {"n": "Farquharson Owen", "c": "Estudiante de grado", "m": 9}, {"n": "Samanta Anahi Zapata", "c": "Estudiante de grado", "m": 9}, {"n": "Jazmin Lucrecia Quiroz Pucheta", "c": "Estudiante de grado", "m": 9}, {"n": "Juan Facundo Castillo", "c": "Personal no docente", "m": 9}, {"n": "Jennifer Nimsi Betjan", "c": "Estudiante de grado", "m": 9}, {"n": "Maria Natalia Mandri", "c": "Investigador/a", "m": 9}, {"n": "silvina dho", "c": "Investigador/a", "m": 9}, {"n": "Karina Trangoni", "c": "Docente", "m": 10}, {"n": "Hirt Carlos", "c": "Estudiante de grado", "m": 10}, {"n": "Gaspar Ferreyra Huk", "c": "Estudiante de grado", "m": 10}, {"n": "Camoletto Davicino", "c": "Estudiante de grado", "m": 10}, {"n": "Buena Nicolás de Jesus", "c": "Personal no docente", "m": 10}, {"n": "Maria Sara Bazzola", "c": "Personal no docente", "m": 10}, {"n": "ANABELA IRUPE SILVA REIS", "c": "Estudiante de grado", "m": 10}, {"n": "Martins Oliveira Taiara", "c": "Estudiante de grado", "m": 10}, {"n": "LORENA YANNET Palczikowski", "c": "Docente", "m": 11}, {"n": "Aillen Abigail Almua", "c": "Estudiante de grado", "m": 11}, {"n": "Anael Valentina Peloso", "c": "Estudiante de grado", "m": 11}, {"n": "Ramon Alberto Meza", "c": "Estudiante de grado", "m": 11}, {"n": "Eric Julián Alberto Naessens Leiva", "c": "Personal no docente", "m": 11}, {"n": "Laura Elizabeth Sánchez", "c": "Graduado/a", "m": 11}, {"n": "Romero Elida Cristina", "c": "Personal no docente", "m": 11}, {"n": "MARTA ROSANA BRIEND", "c": "Docente", "m": 11}, {"n": "Alvaro Monzon Wyngaard", "c": "Docente", "m": 12}, {"n": "Soraya Yasnikowski", "c": "Estudiante de grado", "m": 12}, {"n": "Migue Rolon", "c": "Estudiante de grado", "m": 12}, {"n": "Morales Agustina Noemi", "c": "Estudiante de grado", "m": 12}, {"n": "YOLANDA BEATRIZ ROMAN", "c": "Personal no docente", "m": 12}, {"n": "Jorge Becchio", "c": "Docente", "m": 12}, {"n": "Veronica Cruz", "c": "Graduado/a", "m": 12}, {"n": "Viviana Maria Piatti", "c": "Investigador/a", "m": 12}, {"n": "Karina Latyn", "c": "Docente", "m": 13}, {"n": "María Eugenia Insaurralde", "c": "Estudiante de grado", "m": 13}, {"n": "Zalazar Rocio Ana Liz", "c": "Estudiante de grado", "m": 13}, {"n": "Kuray Gisela Ayelen", "c": "Estudiante de grado", "m": 13}, {"n": "Rodrigo Maximiliano sanchez", "c": "Personal no docente", "m": 13}, {"n": "Jorge Orlando Ponce", "c": "Investigador/a", "m": 13}, {"n": "Altamirano Ricardo Hugo", "c": "Docente", "m": 13}, {"n": "Silvia Rita Pérez", "c": "Docente", "m": 13}, {"n": "Raul Marcelo Winter", "c": "Docente", "m": 14}, {"n": "Rocio Maribel Teixido", "c": "Estudiante de grado", "m": 14}, {"n": "Sofia Marisol Galarza", "c": "Estudiante de grado", "m": 14}, {"n": "Lopez Serial Guadalupe", "c": "Estudiante de grado", "m": 14}, {"n": "Adrián Ramón Sosa", "c": "Personal no docente", "m": 14}, {"n": "Sofía Gembarowski", "c": "Estudiante de grado", "m": 14}, {"n": "Claudio Modenutti", "c": "Investigador/a", "m": 14}, {"n": "Carlos Daniel Lugo De Langhe", "c": "Investigador/a", "m": 14}, {"n": "María Antonia Acosta", "c": "Docente", "m": 15}, {"n": "Diego Cardozo", "c": "Estudiante de grado", "m": 15}, {"n": "Mariana Peñalva", "c": "Estudiante de grado", "m": 15}, {"n": "Ezequiel Fages", "c": "Estudiante de grado", "m": 15}, {"n": "EDGARDO OMAR GAGLIARDONE", "c": "Personal no docente", "m": 15}, {"n": "Saúl Edgardo de la Cruz Rodriguez", "c": "Personal no docente", "m": 15}, {"n": "Tamara Inés Miranda", "c": "Estudiante de grado", "m": 15}, {"n": "Viviana Martha Rodriguez", "c": "Docente", "m": 15}, {"n": "JUAN MARCOS Vallejos", "c": "Docente", "m": 16}, {"n": "Krupp Lautaro", "c": "Estudiante de grado", "m": 16}, {"n": "Pamela Sanchez", "c": "Estudiante de grado", "m": 16}, {"n": "Lugo Brenda Belén", "c": "Estudiante de grado", "m": 16}, {"n": "Gonzalez Aguirre Gisella Beatriz", "c": "Personal no docente", "m": 16}, {"n": "Jose Carlos Hidalgo", "c": "Graduado/a", "m": 16}, {"n": "Ramona Magdalena Romero", "c": "Personal no docente", "m": 16}, {"n": "Ana Eloísa Rea", "c": "Investigador/a", "m": 16}, {"n": "ESCOBAR IGNACIO MIGUEL", "c": "Docente", "m": 17}, {"n": "Camila Belén Cima", "c": "Estudiante de grado", "m": 17}, {"n": "Valeria Otto", "c": "Estudiante de grado", "m": 17}, {"n": "Machado Anna paula", "c": "Estudiante de grado", "m": 17}, {"n": "Natalia Lorena Arduña Medina", "c": "Personal no docente", "m": 17}, {"n": "Andrea Verónica Galiana", "c": "Docente", "m": 17}, {"n": "Gustavo Marcelo Irala", "c": "Graduado/a", "m": 17}, {"n": "Gabriela G Bessone", "c": "Docente", "m": 17}, {"n": "Roxana Lilian Blanco", "c": "Docente", "m": 18}, {"n": "Maximo Galain", "c": "Estudiante de grado", "m": 18}, {"n": "Billordo Maria Victoria", "c": "Estudiante de grado", "m": 18}, {"n": "Jorge Gabriel Montiel", "c": "Estudiante de grado", "m": 18}, {"n": "Echavarria Marta Isabel", "c": "Personal no docente", "m": 18}, {"n": "Lelia Inés Ramirez", "c": "Investigador/a", "m": 18}, {"n": "Roxana Edith Ojeda", "c": "Docente", "m": 18}, {"n": "María Rosenda Britos", "c": "Investigador/a", "m": 18}, {"n": "Jose O Olivarez", "c": "Docente", "m": 19}, {"n": "Insfran Milagros Alejandrina", "c": "Estudiante de grado", "m": 19}, {"n": "Martina Marcela Massaro Vañek", "c": "Estudiante de grado", "m": 19}, {"n": "Mendez Yanela Nicole", "c": "Estudiante de grado", "m": 19}, {"n": "Lorena Fernanda Ruiz", "c": "Personal no docente", "m": 19}, {"n": "Katerine Elisabeth Samana", "c": "Estudiante de grado", "m": 19}, {"n": "Maria Julia López Vallejos", "c": "Investigador/a", "m": 19}, {"n": "Maria Griselda Almirón", "c": "Docente", "m": 19}, {"n": "Toledo Cristona Cecilia", "c": "Docente", "m": 20}, {"n": "Agustina Maria Luz Molina", "c": "Estudiante de grado", "m": 20}, {"n": "Agustina Ayelen Ruiz Diaz", "c": "Estudiante de grado", "m": 20}, {"n": "Kutnich Alexis Gamaliel", "c": "Estudiante de grado", "m": 20}, {"n": "Jessica Lorena Mendiaz", "c": "Personal no docente", "m": 20}, {"n": "Hector Guido Ronal Montaño", "c": "Personal no docente", "m": 20}, {"n": "Luciana Martinez", "c": "Estudiante de grado", "m": 20}, {"n": "Paola Olivera", "c": "Investigador/a", "m": 20}, {"n": "Maria Constanza Affur", "c": "Investigador/a", "m": 21}, {"n": "SANDRA ELENA MART\u00cdNEZ", "c": "Investigador/a", "m": 21}];
+
+function normalize(s){
+  return s
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+const INDEXED = DATA.map(p => ({...p, norm: normalize(p.n)}));
+
+const q = document.getElementById('q');
+const resultsEl = document.getElementById('results');
+const hintEl = document.getElementById('hint');
+
+function search(raw){
+  const norm = normalize(raw);
+  if(norm.length < 2) return { state:'idle' };
+  const tokens = norm.split(' ').filter(Boolean);
+  const matches = INDEXED.filter(p => tokens.every(t => p.norm.includes(t)));
+  if(matches.length === 0) return { state:'none' };
+  if(matches.length === 1) return { state:'one', person: matches[0] };
+  return { state:'many', people: matches.slice(0, 8) };
+}
+
+function renderTicket(person){
+  resultsEl.innerHTML = `
+    <div class="ticket">
+      <div class="ticket-top">
+        <div class="ticket-name">${escapeHtml(person.n.trim())}</div>
+        <div class="ticket-claustro">${escapeHtml(person.c)}</div>
+      </div>
+      <div class="perforation"></div>
+      <div class="ticket-bottom">
+        <div class="mesa-label">TU MESA ES LA</div>
+        <div class="mesa-number">${person.m}</div>
+        <div class="mesa-caption">Buscá el cartel con este número en la sala.</div>
+      </div>
+    </div>
+    <button class="change-search" id="changeBtn">Buscar otro nombre</button>
+  `;
+  document.getElementById('changeBtn').addEventListener('click', () => {
+    q.value = '';
+    resultsEl.innerHTML = '';
+    q.focus();
+  });
+}
+
+function renderMatchList(people){
+  resultsEl.innerHTML = `
+    <p class="hint" style="margin:0 0 10px;">Encontramos varias coincidencias, tocá tu nombre:</p>
+    <div class="matchlist">
+      ${people.map((p,i) => `
+        <button class="match-item" data-idx="${i}">
+          <div class="match-name">${escapeHtml(p.n.trim())}</div>
+          <div class="match-claustro">${escapeHtml(p.c)}</div>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  resultsEl.querySelectorAll('.match-item').forEach(btn => {
+    btn.addEventListener('click', () => renderTicket(people[+btn.dataset.idx]));
+  });
+}
+
+function renderNotFound(){
+  resultsEl.innerHTML = `
+    <div class="notfound">
+      <strong>No encontramos ese nombre.</strong><br>
+      Revisá que esté bien escrito o probá solo con el apellido.
+    </div>
+  `;
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+q.addEventListener('input', () => {
+  const result = search(q.value);
+  if(result.state === 'idle'){ resultsEl.innerHTML = ''; return; }
+  if(result.state === 'none'){ renderNotFound(); return; }
+  if(result.state === 'one'){ renderTicket(result.person); return; }
+  if(result.state === 'many'){ renderMatchList(result.people); return; }
+});
+</script>
+</body>
+</html>
